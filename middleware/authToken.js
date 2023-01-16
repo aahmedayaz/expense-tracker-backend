@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const JWT_SECRET = process.env.JWT_SECRET;
 
 module.exports = function (req, res, next) {
   // Get the token form the Header
@@ -10,7 +11,7 @@ module.exports = function (req, res, next) {
       .json({ msg: "Authorization Denied, token is missing" });
   // verify token
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded.user;
     next();
   } catch (error) {

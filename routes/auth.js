@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // @route   POST /auth
 // @desc    User Authenticated
@@ -44,7 +45,7 @@ router.post("/", async (req, res) => {
 
     jwt.sign(
       payload,
-      JWT_TOKEN,
+      JWT_SECRET,
       {
         expiresIn: 3600000,
       },
