@@ -44,7 +44,7 @@ router.post("/", async (req, res) => {
 
     jwt.sign(
       payload,
-      config.get("jwtSecret"),
+      JWT_TOKEN,
       {
         expiresIn: 3600000,
       },

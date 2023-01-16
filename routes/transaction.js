@@ -21,10 +21,24 @@ router.get("/", authToken, async (req, res) => {
 // @route   POST /transaction
 // @desc    Add Transaction
 // @access  Private
-router.post("/", (req, res) => {
-  res.status(200).json({
-    message: "Private - Transaction Added",
-  });
+router.post("/", authToken, async (req, res) => {
+  const { name, email, phone, type } = req.body;
+
+  try {
+    const newContact = new Contact({
+      name,
+      email,
+      phone,
+      type,
+      user: req.user.id,
+    });
+
+    const contact = await newContact.save();
+    res.json(contact);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
 });
 
 // @route   PUT /transaction
