@@ -22,19 +22,29 @@ router.get("/", authToken, async (req, res) => {
 // @desc    Add Transaction
 // @access  Private
 router.post("/", authToken, async (req, res) => {
-  const { name, email, phone, type } = req.body;
+  const { title, price, type } = req.body;
+  title = title?.trim();
+  type = type?.trim();
+
+  // =============================================================================================
+  // Data Validation
+  // =============================================================================================
+  if (!title || title === "" || !type || type === "" || !price) {
+    return res.status(400).json({
+      error: "Bad Request: Some credentials are missing.",
+    });
+  }
 
   try {
-    const newContact = new Contact({
-      name,
-      email,
-      phone,
+    const newTransaction = new Transaction({
+      title,
+      price,
       type,
-      user: req.user.id,
+      owner_id: req.user.id,
     });
 
-    const contact = await newContact.save();
-    res.json(contact);
+    const transaction = await newTransaction.save();
+    res.json(transaction);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
