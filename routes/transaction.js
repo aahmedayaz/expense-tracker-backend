@@ -54,10 +54,39 @@ router.post("/", authToken, async (req, res) => {
 // @route   PUT /transaction
 // @desc    Update Transaction
 // @access  Private
-router.put("/:id", (req, res) => {
-  res.status(200).json({
-    message: `Private - Transaction Updated`,
-  });
+router.put("/:id", auth, async (req, res) => {
+  const { title, price, type } = req.body;
+
+  const transactionFields = {};
+  // add fields into transactionFields Object that are available in the body to update
+  if (title) transactionFields.title = title;
+  if (price) transactionFields.price = price;
+  if (type) transactionFields.type = type;
+
+  try {
+    // Check if transactions exist
+    let transaction = await Transaction.findById(req.params.id);
+    if (!transaction)
+      return res.status(404).json({ msg: "This transaction does not exist." });
+
+    // Check if user is authorized
+    if (transaction.owner_id.toString() !== req.user.id)
+      return res.status(401).json({
+        msg: "You do not have the correct authorization to update this transaction.",
+      });
+
+    // Find and Update the transaction
+    transaction = await Transaction.findByIdAndUpdate(
+      req.params.id,
+      { $set: transactionFields },
+      { new: true }
+    );
+
+    res.json({ transaction });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
 });
 
 // @route   DELETE /transaction
