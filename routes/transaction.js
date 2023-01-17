@@ -8,10 +8,10 @@ const Transaction = require("../models/Transaction");
 // @access  Private
 router.get("/", authToken, async (req, res) => {
   try {
-    const contacts = await Transaction.find({ user: req.user.id }).sort({
+    const transactions = await Transaction.find({ user: req.user.id }).sort({
       date: -1,
     });
-    res.json(contacts);
+    res.json(transactions);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
@@ -63,10 +63,28 @@ router.put("/:id", (req, res) => {
 // @route   DELETE /transaction
 // @desc    Delete Transaction
 // @access  Private
-router.delete("/:id", (req, res) => {
-  res.status(200).json({
-    message: "Private - Transaction Deleted",
-  });
+router.delete("/:id", authToken, async (req, res) => {
+  try {
+    // Check if transaction exist
+    let transaction = await Transaction.findById(req.params.id);
+    if (!transaction)
+      return res.status(404).json({ msg: "This transaction does not exist." });
+
+    // Check if user is authorized
+    if (transaction.owner_id.toString() !== req.user.id)
+      return res.status(401).json({
+        msg: "You do not have the correct authorization to delete this transaction.",
+      });
+
+    // Find and remove the transaction from MongoDB
+    await Transaction.findByIdAndRemove(req.params.id);
+
+    // Return a confirmation message
+    res.json({ msg: "This transaction has been removed." });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
 });
 
 module.exports = router;
