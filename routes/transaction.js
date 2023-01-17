@@ -8,7 +8,7 @@ const Transaction = require("../models/Transaction");
 // @access  Private
 router.get("/", authToken, async (req, res) => {
   try {
-    const transactions = await Transaction.find({ user: req.user.id }).sort({
+    const transactions = await Transaction.find({ owner_id: req.user.id }).sort({
       date: -1,
     });
     res.json(transactions);
@@ -22,7 +22,7 @@ router.get("/", authToken, async (req, res) => {
 // @desc    Add Transaction
 // @access  Private
 router.post("/", authToken, async (req, res) => {
-  const { title, price, type } = req.body;
+  let { title, price, type } = req.body;
   title = title?.trim();
   type = type?.trim();
 
@@ -54,8 +54,8 @@ router.post("/", authToken, async (req, res) => {
 // @route   PUT /transaction
 // @desc    Update Transaction
 // @access  Private
-router.put("/:id", auth, async (req, res) => {
-  const { title, price, type } = req.body;
+router.put("/:id", authToken, async (req, res) => {
+  let { title, price, type } = req.body;
 
   const transactionFields = {};
   // add fields into transactionFields Object that are available in the body to update
